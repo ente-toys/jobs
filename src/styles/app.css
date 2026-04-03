@@ -237,7 +237,7 @@ button {
 .hero-copy p {
   max-width: none;
   margin: 28px 0 0;
-  font-size: clamp(1.16rem, 1.45vw, 1.34rem);
+  font-size: clamp(1rem, 1.25vw, 1.18rem);
   line-height: 1.66;
   color: var(--muted);
 }
