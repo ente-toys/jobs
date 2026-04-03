@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { getJob, submitApplication } from "../lib/api";
@@ -7,6 +8,7 @@ import { getRoleArtwork } from "../lib/roleArtwork";
 import type { JobDefinition, JobQuestion } from "../lib/types";
 import { QuestionField } from "./QuestionField";
 import { RichText } from "./RichText";
+import { SiteNav } from "./SiteNav";
 
 type ViewState = "loading" | "ready" | "submitted" | "error";
 
@@ -237,15 +239,15 @@ export function JobApplicationPage() {
 
   if (pageState.view === "loading") {
     return (
-      <main className="flow-shell">
+      <FlowPageShell>
         <div className="flow-card loading-card" />
-      </main>
+      </FlowPageShell>
     );
   }
 
   if (pageState.view === "error" || !job) {
     return (
-      <main className="flow-shell">
+      <FlowPageShell>
         <section className="flow-card error-card">
           <span className="eyebrow">ente jobs</span>
           <h1>This role is not available right now.</h1>
@@ -254,13 +256,13 @@ export function JobApplicationPage() {
             Back to roles
           </Link>
         </section>
-      </main>
+      </FlowPageShell>
     );
   }
 
   if (pageState.view === "submitted") {
     return (
-      <main className="flow-shell">
+      <FlowPageShell>
         <motion.section
           className="flow-card success-card"
           initial={{ opacity: 0, y: 24 }}
@@ -282,12 +284,12 @@ export function JobApplicationPage() {
             Check out Ente
           </a>
         </motion.section>
-      </main>
+      </FlowPageShell>
     );
   }
 
   return (
-    <main className="flow-shell">
+    <FlowPageShell>
       <section className="flow-card">
         <div className="progress-track" aria-hidden="true">
           <motion.div
@@ -361,6 +363,15 @@ export function JobApplicationPage() {
 
         {submissionError ? <p className="submission-error">{submissionError}</p> : null}
       </section>
+    </FlowPageShell>
+  );
+}
+
+function FlowPageShell({ children }: { children: ReactNode }) {
+  return (
+    <main className="flow-page-shell">
+      <SiteNav />
+      <div className="flow-shell">{children}</div>
     </main>
   );
 }

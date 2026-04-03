@@ -77,6 +77,13 @@ button {
   padding: 40px 0 72px;
 }
 
+.flow-page-shell {
+  width: min(960px, calc(100% - 48px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 40px 0 32px;
+}
+
 .site-nav {
   display: flex;
   align-items: center;
@@ -297,7 +304,7 @@ button {
 
 .jobs-section {
   margin-top: 52px;
-  padding-top: 30px;
+  padding-top: 42px;
   border-top: 1px solid var(--line);
 }
 
@@ -514,12 +521,12 @@ button {
 }
 
 .flow-shell {
-  width: min(1000px, calc(100% - 32px));
-  min-height: 100vh;
-  margin: 0 auto;
   display: grid;
-  place-items: center;
-  padding: 24px 0;
+  justify-items: center;
+}
+
+.flow-page-shell .flow-card {
+  min-height: min(820px, calc(100vh - 212px));
 }
 
 .flow-card {
@@ -1166,6 +1173,11 @@ button {
     padding-top: 24px;
   }
 
+  .flow-page-shell {
+    width: min(100% - 24px, 960px);
+    padding: 24px 0 20px;
+  }
+
   .site-nav {
     border-radius: 28px;
   }
@@ -1176,11 +1188,6 @@ button {
 
   .hero-section {
     min-height: auto;
-  }
-
-  .flow-shell {
-    width: min(100% - 20px, 1000px);
-    padding: 12px 0;
   }
 
   .admin-layout {
@@ -1196,6 +1203,10 @@ button {
     min-height: calc(100vh - 24px);
     border-radius: 28px;
     padding: 22px 20px 20px;
+  }
+
+  .flow-page-shell .flow-card {
+    min-height: calc(100vh - 202px);
   }
 
   .progress-track {
@@ -1236,6 +1247,7 @@ button {
     flex-direction: column;
     padding: 18px;
     gap: 14px;
+    margin-bottom: 40px;
     border-radius: 28px;
   }
 
