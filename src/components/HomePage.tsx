@@ -20,12 +20,20 @@ const navItems = [
   { label: "Download", href: "https://ente.com/download" },
 ];
 
+const mobileNavQuery = "(max-width: 640px)";
+
 export function HomePage() {
   const [state, setState] = useState<HomePageState>({
     jobs: [],
     loading: true,
     error: null,
   });
+  const [isMobileNav, setIsMobileNav] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(mobileNavQuery).matches,
+  );
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -55,36 +63,107 @@ export function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQueryList = window.matchMedia(mobileNavQuery);
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsMobileNav(event.matches);
+    };
+
+    setIsMobileNav(mediaQueryList.matches);
+    mediaQueryList.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQueryList.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileNav) {
+      setIsNavOpen(false);
+    }
+  }, [isMobileNav]);
+
+  useEffect(() => {
+    if (!isNavOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsNavOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isNavOpen]);
+
   return (
     <main className="page-shell">
       <motion.header
-        className="site-nav"
+        className={`site-nav ${isNavOpen ? "is-open" : ""}`}
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
-        <a
-          aria-label="Ente home"
-          className="site-nav-brand"
-          href="https://ente.com/"
-          rel="noreferrer"
-          target="_blank"
-        >
-          <img alt="Ente" src="/ente-wordmark.svg" />
-        </a>
-        <nav aria-label="Primary" className="site-nav-links">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              className="site-nav-link"
-              href={item.href}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <div className="site-nav-top">
+          <a
+            aria-label="Ente home"
+            className="site-nav-brand"
+            href="https://ente.com/"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <img alt="Ente" src="/ente-wordmark.svg" />
+          </a>
+          <button
+            aria-controls="site-primary-nav"
+            aria-expanded={isNavOpen}
+            aria-label={isNavOpen ? "Close navigation menu" : "Open navigation menu"}
+            className="site-nav-toggle"
+            onClick={() => {
+              setIsNavOpen((current) => !current);
+            }}
+            type="button"
+          >
+            <span aria-hidden="true" className="site-nav-toggle-icon">
+              <span />
+              <span />
+              <span />
+            </span>
+          </button>
+        </div>
+        {!isMobileNav || isNavOpen ? (
+          <nav
+            aria-label="Primary"
+            className="site-nav-links"
+            id="site-primary-nav"
+          >
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                className="site-nav-link"
+                href={item.href}
+                onClick={() => {
+                  if (isMobileNav) {
+                    setIsNavOpen(false);
+                  }
+                }}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
       </motion.header>
 
       <section className="hero-section">

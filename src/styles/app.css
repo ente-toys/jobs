@@ -83,12 +83,18 @@ button {
   justify-content: space-between;
   gap: 18px;
   padding: 14px 18px;
-  margin-bottom: 56px;
+  margin-bottom: 72px;
   border: 1px solid rgba(21, 21, 21, 0.08);
   border-radius: 999px;
   background: rgba(255, 250, 243, 0.76);
   backdrop-filter: blur(28px);
   box-shadow: 0 20px 48px rgba(18, 18, 18, 0.07);
+}
+
+.site-nav-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .site-nav-brand {
@@ -108,6 +114,58 @@ button {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.site-nav-toggle {
+  display: none;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
+  color: rgba(21, 21, 21, 0.84);
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+}
+
+.site-nav-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(21, 21, 21, 0.14);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.site-nav-toggle-icon {
+  display: grid;
+  gap: 4px;
+}
+
+.site-nav-toggle-icon span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center;
+  transition:
+    transform 220ms ease,
+    opacity 220ms ease;
+}
+
+.site-nav.is-open .site-nav-toggle-icon span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.site-nav.is-open .site-nav-toggle-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.site-nav.is-open .site-nav-toggle-icon span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 .site-nav-link {
@@ -1176,8 +1234,12 @@ button {
     align-items: stretch;
     flex-direction: column;
     padding: 18px;
-    gap: 16px;
+    gap: 14px;
     border-radius: 28px;
+  }
+
+  .site-nav-top {
+    justify-content: space-between;
   }
 
   .site-nav-brand {
@@ -1185,18 +1247,22 @@ button {
     min-height: 40px;
   }
 
+  .site-nav-toggle {
+    display: inline-flex;
+  }
+
   .site-nav-links {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     width: 100%;
-    gap: 10px;
+    gap: 8px;
   }
 
   .site-nav-link {
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 44px;
-    padding: 0 14px;
-    text-align: center;
+    padding: 0 16px;
+    text-align: left;
     font-size: 0.92rem;
     background: rgba(255, 255, 255, 0.52);
     border-color: rgba(21, 21, 21, 0.06);
