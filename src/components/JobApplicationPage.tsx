@@ -351,7 +351,7 @@ export function JobApplicationPage() {
               {isSubmitting
                 ? "Submitting..."
                 : stepIndex === 0
-                  ? "Next"
+                  ? "Apply"
                   : stepIndex === job.questions.length
                     ? "Submit"
                     : "Next"}
