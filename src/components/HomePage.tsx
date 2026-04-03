@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { getJobs } from "../lib/api";
 import { getRoleArtwork } from "../lib/roleArtwork";
 import type { JobCard } from "../lib/types";
+import { RichText } from "./RichText";
 
 interface HomePageState {
   jobs: JobCard[];
@@ -163,21 +164,32 @@ function JobGrid({ jobs }: { jobs: JobCard[] }) {
               ease: [0.22, 1, 0.36, 1],
             }}
           >
-            <Link className="job-card" to={`/${job.slug}`}>
-              <div className="job-card-meta">
-                <span className="job-card-team">{job.team}</span>
-                <span aria-hidden="true" className="job-card-dot" />
-              </div>
-              {artwork ? (
-                <div className="job-card-artwork" aria-hidden="true">
-                  <img alt="" src={artwork} />
+            <article className="job-card">
+              <Link
+                aria-label={`Open ${job.title}`}
+                className="job-card-surface-link"
+                to={`/${job.slug}`}
+              />
+              <div className="job-card-content">
+                <div className="job-card-meta">
+                  <span className="job-card-team">{job.team}</span>
+                  <span aria-hidden="true" className="job-card-dot" />
                 </div>
-              ) : null}
-              <div className="job-card-body">
-                <h3>{job.title}</h3>
-                <p className="multiline-copy">{job.cardDescription}</p>
+                {artwork ? (
+                  <div className="job-card-artwork" aria-hidden="true">
+                    <img alt="" src={artwork} />
+                  </div>
+                ) : null}
+                <div className="job-card-body">
+                  <h3>{job.title}</h3>
+                  <RichText
+                    className="job-card-description rich-copy"
+                    html={job.cardDescription}
+                    mode="block"
+                  />
+                </div>
               </div>
-            </Link>
+            </article>
           </motion.div>
         );
       })}

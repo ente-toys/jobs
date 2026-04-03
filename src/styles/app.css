@@ -14,10 +14,11 @@
   --ink: #151515;
   --muted: #666057;
   --line: rgba(21, 21, 21, 0.11);
-  --accent: #08c225;
-  --accent-soft: rgba(8, 194, 37, 0.14);
-  --card-hover: #f05b2d;
-  --card-hover-soft: rgba(240, 91, 45, 0.14);
+  --brand-green-rgb: 8, 194, 37;
+  --brand-green: #08c225;
+  --accent-rgb: 127, 111, 93;
+  --accent: #7f6f5d;
+  --accent-soft: rgba(var(--accent-rgb), 0.14);
   --shadow: 0 24px 80px rgba(18, 18, 18, 0.08);
 }
 
@@ -36,9 +37,9 @@ body {
   color: var(--ink);
   font-family: inherit;
   background:
-    radial-gradient(circle at top left, rgba(255, 114, 68, 0.22), transparent 28%),
+    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.09), transparent 28%),
     radial-gradient(circle at right 10%, rgba(255, 255, 255, 0.88), transparent 20%),
-    linear-gradient(180deg, #f8f1e7 0%, var(--canvas) 58%, var(--canvas-deep) 100%);
+    linear-gradient(180deg, #f7f3eb 0%, var(--canvas) 58%, var(--canvas-deep) 100%);
   background-attachment: fixed;
 }
 
@@ -253,8 +254,57 @@ button {
   line-height: 1.08;
 }
 
-.multiline-copy {
+.multiline-copy,
+.rich-copy {
   white-space: pre-line;
+}
+
+.rich-copy > :first-child {
+  margin-top: 0;
+}
+
+.rich-copy > :last-child {
+  margin-bottom: 0;
+}
+
+.rich-copy p,
+.rich-copy ul,
+.rich-copy ol {
+  margin: 0 0 1em;
+}
+
+.rich-copy ul,
+.rich-copy ol {
+  padding-left: 1.2em;
+}
+
+.rich-copy li + li {
+  margin-top: 0.32em;
+}
+
+.rich-copy a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(21, 21, 21, 0.22);
+  text-underline-offset: 0.18em;
+}
+
+.rich-copy a:hover {
+  text-decoration-color: rgba(21, 21, 21, 0.42);
+}
+
+.rich-copy code {
+  font-family:
+    ui-monospace,
+    "SFMono-Regular",
+    "SF Mono",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 0.94em;
+  padding: 0.12em 0.32em;
+  border-radius: 0.38em;
+  background: rgba(21, 21, 21, 0.06);
 }
 
 .jobs-grid {
@@ -276,10 +326,29 @@ button {
     background 240ms ease;
 }
 
+.job-card-surface-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.job-card-surface-link:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.48);
+  outline-offset: -2px;
+}
+
+.job-card-content {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+  pointer-events: none;
+}
+
 .job-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(240, 91, 45, 0.28);
-  background: rgba(255, 247, 239, 0.92);
+  border-color: rgba(var(--accent-rgb), 0.22);
+  background: rgba(255, 253, 249, 0.92);
 }
 
 .job-card-meta {
@@ -303,13 +372,13 @@ button {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(8, 194, 37, 0);
+  background: var(--brand-green);
+  box-shadow: 0 0 0 0 rgba(var(--brand-green-rgb), 0);
   transition: box-shadow 240ms ease;
 }
 
 .job-card:hover .job-card-dot {
-  box-shadow: 0 0 0 6px var(--accent-soft);
+  box-shadow: 0 0 0 6px rgba(var(--brand-green-rgb), 0.14);
 }
 
 .job-card-artwork {
@@ -343,11 +412,17 @@ button {
   line-height: 1.02;
 }
 
-.job-card p {
+.job-card p,
+.job-card-description {
   max-width: 22rem;
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
+}
+
+.job-card-description a {
+  pointer-events: auto;
+  position: relative;
 }
 
 .empty-state {
@@ -367,7 +442,7 @@ button {
 }
 
 .error-state {
-  border-color: rgba(8, 194, 37, 0.26);
+  border-color: rgba(var(--accent-rgb), 0.24);
 }
 
 .skeleton-card {
@@ -425,14 +500,14 @@ button {
   height: 8px;
   margin: -28px -30px 2px;
   border-radius: 38px 38px 999px 999px;
-  background: linear-gradient(180deg, rgba(8, 194, 37, 0.1), rgba(8, 194, 37, 0.04));
+  background: rgba(21, 21, 21, 0.08);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--accent);
+  background: var(--brand-green);
 }
 
 .flow-stage {
@@ -542,7 +617,7 @@ button {
   bottom: 0;
   left: 0;
   height: 2px;
-  background: linear-gradient(90deg, rgba(21, 21, 21, 0.18), rgba(8, 194, 37, 0.42));
+  background: linear-gradient(90deg, rgba(21, 21, 21, 0.18), rgba(var(--accent-rgb), 0.42));
 }
 
 .flow-input {
@@ -574,6 +649,7 @@ button {
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-left: auto;
 }
 
 .flow-footer-artwork {
@@ -608,7 +684,7 @@ button {
 
 .primary-button-accent {
   color: #fffaf6;
-  background: var(--accent);
+  background: var(--brand-green);
 }
 
 .primary-button:hover:not(:disabled),
@@ -628,7 +704,7 @@ button {
 
 .submission-error {
   margin: 0;
-  color: #087d1c;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -762,7 +838,7 @@ button {
 }
 
 .admin-job-item.is-selected {
-  border-color: rgba(8, 194, 37, 0.28);
+  border-color: rgba(var(--accent-rgb), 0.28);
   background: rgba(255, 250, 243, 0.88);
 }
 
@@ -847,7 +923,7 @@ button {
 }
 
 .admin-insert-question:hover {
-  border-color: rgba(8, 194, 37, 0.28);
+  border-color: rgba(var(--accent-rgb), 0.28);
   background: rgba(255, 255, 255, 0.98);
   color: rgba(21, 21, 21, 0.82);
 }
@@ -872,9 +948,9 @@ button {
 
 .admin-question-slot.is-active {
   height: 38px;
-  border: 1px dashed rgba(8, 194, 37, 0.28);
+  border: 1px dashed rgba(var(--accent-rgb), 0.28);
   border-radius: 18px;
-  background: rgba(8, 194, 37, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 
 .admin-question-slot.is-active::before {
@@ -929,7 +1005,7 @@ button {
 }
 
 .admin-input:focus {
-  border-color: rgba(8, 194, 37, 0.34);
+  border-color: rgba(var(--accent-rgb), 0.34);
 }
 
 .admin-textarea {
@@ -979,7 +1055,7 @@ button {
 
 .admin-question-card.is-dragging {
   opacity: 0.56;
-  border-color: rgba(8, 194, 37, 0.28);
+  border-color: rgba(var(--accent-rgb), 0.28);
 }
 
 .admin-submission-meta {
@@ -1012,7 +1088,7 @@ button {
 }
 
 .danger {
-  color: #087d1c;
+  color: var(--accent);
 }
 
 @keyframes shimmer {

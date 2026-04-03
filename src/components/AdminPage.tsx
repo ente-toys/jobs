@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
 
 import { createAdminJob, getAdminBootstrap, updateAdminJob } from "../lib/api";
+import { stripRichText } from "../lib/plainText";
 import type {
   AdminBootstrapResponse,
   AdminCreateJobInput,
@@ -572,7 +573,7 @@ export function AdminPage() {
                             <div className="admin-question-heading">
                               <strong>Question {index + 1}</strong>
                               <span>
-                                {question.prompt || question.id || "Drag to reorder"}
+                                {stripRichText(question.prompt) || question.id || "Drag to reorder"}
                               </span>
                             </div>
                             <button

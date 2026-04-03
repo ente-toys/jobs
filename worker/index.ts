@@ -10,6 +10,7 @@ import type {
   JobQuestion,
   SubmissionResponse,
 } from "../src/lib/types";
+import { hasRichTextContent, stripRichText } from "../src/lib/plainText";
 
 interface Env {
   DB: D1Database;
@@ -376,7 +377,7 @@ function validateAnswers(
     const value = typeof rawValue === "string" ? rawValue.trim() : "";
 
     if (question.required && !value) {
-      const questionTitle = question.prompt.split("\n")[0]?.trim() || question.id;
+      const questionTitle = stripRichText(question.prompt).split("\n")[0]?.trim() || question.id;
       throw new Error(`Please answer "${questionTitle}" before submitting.`);
     }
 
@@ -389,11 +390,15 @@ function validateAnswers(
 function validateAdminJobInput(
   payload: Partial<AdminUpdateJobInput>,
 ): asserts payload is AdminUpdateJobInput {
-  if (!payload.team || !payload.title || !payload.cardDescription) {
+  if (!payload.team?.trim() || !payload.title?.trim() || !hasRichTextContent(payload.cardDescription ?? "")) {
     throw new Error("Team, title, and card description are required.");
   }
 
-  if (!payload.introEyebrow || !payload.introTitle || !payload.introDescription) {
+  if (
+    !payload.introEyebrow?.trim() ||
+    !hasRichTextContent(payload.introTitle ?? "") ||
+    !hasRichTextContent(payload.introDescription ?? "")
+  ) {
     throw new Error("Intro copy is required.");
   }
 
@@ -403,10 +408,10 @@ function validateAdminJobInput(
 
   for (const question of payload.questions) {
     if (
-      !question.id ||
-      !question.prompt ||
-      !question.helper ||
-      !question.placeholder
+      !question.id?.trim() ||
+      !hasRichTextContent(question.prompt ?? "") ||
+      !hasRichTextContent(question.helper ?? "") ||
+      !question.placeholder?.trim()
     ) {
       throw new Error("Every question must include complete copy.");
     }

@@ -11,6 +11,8 @@ interface QuestionFieldProps {
   value: string;
   onChange: (value: string) => void;
   onAdvance: () => void;
+  onArrowAdvance: () => void;
+  onRetreat: () => void;
   setFieldRef?: (node: HTMLInputElement | HTMLTextAreaElement | null) => void;
 }
 
@@ -29,8 +31,22 @@ export function QuestionField({
   value,
   onChange,
   onAdvance,
+  onArrowAdvance,
+  onRetreat,
   setFieldRef,
 }: QuestionFieldProps) {
+  const hasModifier = (event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    event.shiftKey || event.altKey || event.ctrlKey || event.metaKey;
+
+  const hasSelection = (field: HTMLInputElement | HTMLTextAreaElement) =>
+    field.selectionStart !== field.selectionEnd;
+
+  const isOnFirstLine = (field: HTMLTextAreaElement) =>
+    !field.value.slice(0, field.selectionStart ?? 0).includes("\n");
+
+  const isOnLastLine = (field: HTMLTextAreaElement) =>
+    !field.value.slice(field.selectionEnd ?? 0).includes("\n");
+
   const commonProps = {
     value,
     placeholder: question.placeholder,
@@ -49,9 +65,29 @@ export function QuestionField({
         ref={setFieldRef}
         rows={6}
         onKeyDown={(event: KeyboardEvent<HTMLTextAreaElement>) => {
+          if (hasModifier(event)) {
+            return;
+          }
+
           if (event.key === "Enter" && !event.shiftKey && value.trim()) {
             event.preventDefault();
             onAdvance();
+            return;
+          }
+
+          if (hasSelection(event.currentTarget)) {
+            return;
+          }
+
+          if (event.key === "ArrowUp" && isOnFirstLine(event.currentTarget)) {
+            event.preventDefault();
+            onRetreat();
+            return;
+          }
+
+          if (event.key === "ArrowDown" && value.trim() && isOnLastLine(event.currentTarget)) {
+            event.preventDefault();
+            onArrowAdvance();
           }
         }}
       />
@@ -65,9 +101,25 @@ export function QuestionField({
       type={question.type === "url" ? "url" : "text"}
       inputMode={inputModeByType[question.type]}
       onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+        if (hasModifier(event)) {
+          return;
+        }
+
         if (event.key === "Enter" && value.trim()) {
           event.preventDefault();
           onAdvance();
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          onRetreat();
+          return;
+        }
+
+        if (event.key === "ArrowDown" && value.trim()) {
+          event.preventDefault();
+          onArrowAdvance();
         }
       }}
     />

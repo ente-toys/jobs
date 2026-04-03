@@ -6,6 +6,7 @@ import { getJob, submitApplication } from "../lib/api";
 import { getRoleArtwork } from "../lib/roleArtwork";
 import type { JobDefinition, JobQuestion } from "../lib/types";
 import { QuestionField } from "./QuestionField";
+import { RichText } from "./RichText";
 
 type ViewState = "loading" | "ready" | "submitted" | "error";
 
@@ -126,6 +127,16 @@ export function JobApplicationPage() {
     setStepIndex((current) => current - 1);
   };
 
+  const goToNextStep = () => {
+    if (!job || isSubmitting || stepIndex >= job.questions.length) {
+      return;
+    }
+
+    setSubmissionError(null);
+    setDirection(1);
+    setStepIndex((current) => current + 1);
+  };
+
   const goForward = async () => {
     if (!job || isSubmitting) {
       return;
@@ -169,6 +180,60 @@ export function JobApplicationPage() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (pageState.view !== "ready") {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.repeat
+      ) {
+        return;
+      }
+
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        (target.closest("input, textarea, button, a, select, label") ||
+          (target instanceof HTMLElement && target.isContentEditable))
+      ) {
+        return;
+      }
+
+      if (event.key === "Enter" && !event.shiftKey && stepIndex === 0) {
+        event.preventDefault();
+        void goForward();
+        return;
+      }
+
+      if (event.shiftKey) {
+        return;
+      }
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        goToNextStep();
+        return;
+      }
+
+      if ((event.key === "ArrowLeft" || event.key === "ArrowUp") && stepIndex > 0) {
+        event.preventDefault();
+        goBack();
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [goBack, goForward, goToNextStep, pageState.view, stepIndex]);
 
   if (pageState.view === "loading") {
     return (
@@ -254,6 +319,8 @@ export function JobApplicationPage() {
                 onAdvance={() => {
                   void goForward();
                 }}
+                onArrowAdvance={goToNextStep}
+                onRetreat={goBack}
               />
             )}
           </AnimatePresence>
@@ -264,13 +331,11 @@ export function JobApplicationPage() {
             <div className="flow-footer-artwork" aria-hidden="true">
               <img alt="" src={introArtwork} />
             </div>
-          ) : (
+          ) : activeQuestion?.type === "textarea" ? (
             <div className="flow-hint">
-              {activeQuestion?.type === "textarea"
-                ? "Press Enter to continue. Shift + Enter adds a new line."
-                : "Press Enter to continue."}
+              Shift + Enter adds a new line.
             </div>
-          )}
+          ) : null}
           <div className="flow-actions">
             <button className="ghost-button" onClick={goBack} type="button">
               {stepIndex === 0 ? "Back" : "Previous"}
@@ -316,8 +381,17 @@ function StepIntro({
       exit={{ opacity: 0, x: direction > 0 ? -40 : 40 }}
       transition={animationTransition}
     >
-      <h1 className="multiline-copy">{job.introTitle}</h1>
-      <p className="intro-copy multiline-copy">{job.introDescription}</p>
+      <RichText
+        as="h1"
+        className="rich-copy"
+        html={job.introTitle}
+        mode="inline"
+      />
+      <RichText
+        className="intro-copy rich-copy"
+        html={job.introDescription}
+        mode="block"
+      />
       <div className="intro-summary">
         <div className="intro-summary-card">
           <span className="summary-marker">
@@ -346,12 +420,16 @@ function StepQuestion({
   value,
   onChange,
   onAdvance,
+  onArrowAdvance,
+  onRetreat,
 }: {
   direction: number;
   question: JobQuestion | null;
   value: string;
   onChange: (value: string) => void;
   onAdvance: () => void;
+  onArrowAdvance: () => void;
+  onRetreat: () => void;
 }) {
   const fieldWrapRef = useRef<HTMLDivElement | null>(null);
   const fieldRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
@@ -452,8 +530,17 @@ function StepQuestion({
         focusField();
       }}
     >
-      <h1 className="multiline-copy">{question.prompt}</h1>
-      <p className="question-helper multiline-copy">{question.helper}</p>
+      <RichText
+        as="h1"
+        className="rich-copy"
+        html={question.prompt}
+        mode="inline"
+      />
+      <RichText
+        className="question-helper rich-copy"
+        html={question.helper}
+        mode="block"
+      />
       <div className="flow-input-wrap" ref={fieldWrapRef}>
         <QuestionField
           setFieldRef={(node) => {
@@ -463,6 +550,8 @@ function StepQuestion({
           value={value}
           onChange={onChange}
           onAdvance={onAdvance}
+          onArrowAdvance={onArrowAdvance}
+          onRetreat={onRetreat}
         />
       </div>
     </motion.div>
