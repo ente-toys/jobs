@@ -371,9 +371,7 @@ export function AdminPage() {
     return (
       <main className="admin-shell">
         <section className="admin-login-card">
-          <span className="eyebrow">Admin</span>
           <h1>Unlock the jobs console</h1>
-          <p>Enter the shared admin key to edit postings and inspect submissions.</p>
           <div className="admin-login-row">
             <input
               className="admin-input"
