@@ -19,7 +19,7 @@
     {
       "binding": "DB",
       "database_name": "ente-jobs",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "5877ffa3-9ad1-4c98-9eea-cd1e7aa6b599",
       "preview_database_id": "ente-jobs-local",
       "migrations_dir": "./migrations"
     }
