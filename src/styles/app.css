@@ -285,12 +285,13 @@ button {
 .rich-copy a {
   color: inherit;
   text-decoration: underline;
-  text-decoration-color: rgba(21, 21, 21, 0.22);
+  text-decoration-color: rgba(21, 21, 21, 0.34);
+  text-decoration-thickness: 0.1em;
   text-underline-offset: 0.18em;
 }
 
 .rich-copy a:hover {
-  text-decoration-color: rgba(21, 21, 21, 0.42);
+  text-decoration-color: rgba(21, 21, 21, 0.5);
 }
 
 .rich-copy code {
