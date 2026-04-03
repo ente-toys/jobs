@@ -1,0 +1,30 @@
+{
+  "name": "ente-jobs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite",
+    "build": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler tsc --noEmit && XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite build",
+    "preview": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite preview",
+    "deploy": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite build && XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler deploy",
+    "db:local": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler d1 migrations apply ente-jobs --local",
+    "db:remote": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler d1 migrations apply ente-jobs"
+  },
+  "dependencies": {
+    "framer-motion": "^12.12.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.13.5",
+    "@cloudflare/workers-types": "^4.20260328.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.1.0",
+    "wrangler": "^4.11.1"
+  }
+}
