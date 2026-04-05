@@ -123,12 +123,27 @@ function normalizeHref(href: string) {
   }
 
   if (safeHrefPattern.test(href)) {
-    return href;
+    return appendJobsSourceIfNeeded(href);
   }
 
   if (bareDomainPattern.test(href)) {
-    return `https://${href}`;
+    return appendJobsSourceIfNeeded(`https://${href}`);
   }
 
   return null;
+}
+
+function appendJobsSourceIfNeeded(href: string) {
+  try {
+    const url = new URL(href);
+
+    if (url.hostname !== "ente.com" && url.hostname !== "www.ente.com") {
+      return href;
+    }
+
+    url.searchParams.set("utm_source", "jobs");
+    return url.toString();
+  } catch {
+    return href;
+  }
 }
