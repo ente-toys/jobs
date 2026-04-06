@@ -279,7 +279,7 @@ export function JobApplicationPage() {
           <p>If the fit is real, we will get back to you quickly!</p>
           <a
             className="primary-button primary-button-accent"
-            href="https://ente.com/?utm_source=jobs"
+            href="https://ente.com/"
           >
             Check out Ente
           </a>

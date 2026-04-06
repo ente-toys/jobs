@@ -7,11 +7,11 @@ type SiteNavItem =
   | { label: string; to: string };
 
 const navItems: SiteNavItem[] = [
-  { label: "Home", href: "https://ente.com/?utm_source=jobs" },
+  { label: "Home", href: "https://ente.com/" },
   { label: "Jobs", to: "/" },
-  { label: "About", href: "https://ente.com/about?utm_source=jobs" },
-  { label: "Blog", href: "https://ente.com/blog?utm_source=jobs" },
-  { label: "Download", href: "https://ente.com/download?utm_source=jobs" },
+  { label: "About", href: "https://ente.com/about" },
+  { label: "Blog", href: "https://ente.com/blog" },
+  { label: "Download", href: "https://ente.com/download" },
 ];
 
 const mobileNavQuery = "(max-width: 640px)";
