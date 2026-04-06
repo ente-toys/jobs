@@ -1,66 +1,25 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
 
 import { createAdminJob, getAdminBootstrap, updateAdminJob } from "../lib/api";
-import { stripRichText } from "../lib/plainText";
 import type {
   AdminBootstrapResponse,
   AdminCreateJobInput,
   AdminJobRecord,
   AdminSubmissionRecord,
-  AdminUpdateJobInput,
   JobQuestion,
 } from "../lib/types";
+import { JobEditorPanel } from "./admin/JobEditorPanel";
+import { SubmissionsPanel } from "./admin/SubmissionsPanel";
+import {
+  type AdminDraft,
+  createBlankDraft,
+  createDraftQuestion,
+  hydrateDraft,
+  serializeDraftQuestions,
+} from "./admin/shared";
 
 type AdminViewState = "locked" | "loading" | "ready" | "error";
-
-const blankQuestion: JobQuestion = {
-  id: "",
-  prompt: "",
-  helper: "",
-  placeholder: "",
-  type: "text",
-  required: true,
-};
-
-interface DraftQuestion extends JobQuestion {
-  clientId: string;
-}
-
-interface AdminDraft extends Omit<AdminUpdateJobInput, "questions"> {
-  questions: DraftQuestion[];
-}
-
-function createQuestionClientId() {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-
-  return `question-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function createDraftQuestion(question: Partial<JobQuestion> = {}): DraftQuestion {
-  return {
-    id: question.id ?? "",
-    prompt: question.prompt ?? "",
-    helper: question.helper ?? "",
-    placeholder: question.placeholder ?? "",
-    type: question.type ?? "text",
-    required: question.required ?? true,
-    clientId: createQuestionClientId(),
-  };
-}
-
-function serializeDraftQuestions(questions: DraftQuestion[]): JobQuestion[] {
-  return questions.map(({ clientId: _clientId, ...question }) => ({
-    id: question.id,
-    prompt: question.prompt,
-    helper: question.helper,
-    placeholder: question.placeholder,
-    type: question.type,
-    required: question.required,
-  }));
-}
 
 export function AdminPage() {
   const [viewState, setViewState] = useState<AdminViewState>("locked");
@@ -101,33 +60,20 @@ export function AdminPage() {
 
   const canDownloadCsv = filteredSubmissions.length > 0;
 
-  function hydrateDraft(job: AdminJobRecord): AdminDraft {
-    return {
-      team: job.team,
-      title: job.title,
-      cardDescription: job.cardDescription,
-      introEyebrow: job.introEyebrow,
-      introTitle: job.introTitle,
-      introDescription: job.introDescription,
-      questions: job.questions.map((question) => createDraftQuestion(question)),
-      isActive: job.isActive,
-      sortOrder: job.sortOrder,
-    };
-  }
+  const replaceDraft = (nextDraft: AdminDraft) => {
+    setDraft(nextDraft);
+  };
 
-  function createBlankDraft(): AdminDraft {
-    return {
-      team: "",
-      title: "",
-      cardDescription: "",
-      introEyebrow: "",
-      introTitle: "",
-      introDescription: "",
-      questions: [createDraftQuestion()],
-      isActive: true,
-      sortOrder: (data?.jobs.at(-1)?.sortOrder ?? -1) + 1,
-    };
-  }
+  const updateDraft = (
+    updater: (current: AdminDraft) => AdminDraft,
+  ) => {
+    setDraft((current) => (current ? updater(current) : current));
+  };
+
+  const resetQuestionDrag = () => {
+    setDraggedQuestionId(null);
+    setDragTargetIndex(null);
+  };
 
   async function loadAdminData(preferredSlug?: string | null) {
     setViewState("loading");
@@ -144,8 +90,7 @@ export function AdminPage() {
       setDraft(currentJob ? hydrateDraft(currentJob) : null);
       setDraftSlug(currentJob?.slug ?? "");
       setIsCreating(false);
-      setDraggedQuestionId(null);
-      setDragTargetIndex(null);
+      resetQuestionDrag();
       setViewState("ready");
     } catch (loadError) {
       setViewState("error");
@@ -173,17 +118,17 @@ export function AdminPage() {
     setDraftSlug(job.slug);
     setIsCreating(false);
     setError(null);
+    resetQuestionDrag();
   };
 
   const handleCreateNew = () => {
-    const freshDraft = createBlankDraft();
+    const freshDraft = createBlankDraft((data?.jobs.at(-1)?.sortOrder ?? -1) + 1);
     setSelectedJobSlug(null);
     setDraft(freshDraft);
     setDraftSlug("");
     setIsCreating(true);
     setError(null);
-    setDraggedQuestionId(null);
-    setDragTargetIndex(null);
+    resetQuestionDrag();
   };
 
   const handleQuestionChange = (
@@ -191,11 +136,7 @@ export function AdminPage() {
     field: keyof JobQuestion,
     value: string | boolean,
   ) => {
-    setDraft((current) => {
-      if (!current) {
-        return current;
-      }
-
+    updateDraft((current) => {
       const questions = current.questions.map((question) =>
         question.clientId === questionId ? { ...question, [field]: value } : question,
       );
@@ -207,12 +148,15 @@ export function AdminPage() {
     });
   };
 
-  const insertQuestionAt = (targetIndex: number) => {
-    setDraft((current) => {
-      if (!current) {
-        return current;
-      }
+  const handleAddQuestion = () => {
+    updateDraft((current) => ({
+      ...current,
+      questions: [...current.questions, createDraftQuestion()],
+    }));
+  };
 
+  const insertQuestionAt = (targetIndex: number) => {
+    updateDraft((current) => {
       const questions = [...current.questions];
       questions.splice(targetIndex, 0, createDraftQuestion());
 
@@ -224,11 +168,7 @@ export function AdminPage() {
   };
 
   const moveQuestion = (questionId: string, targetIndex: number) => {
-    setDraft((current) => {
-      if (!current) {
-        return current;
-      }
-
+    updateDraft((current) => {
       const currentIndex = current.questions.findIndex(
         (question) => question.clientId === questionId,
       );
@@ -254,6 +194,13 @@ export function AdminPage() {
         questions,
       };
     });
+  };
+
+  const removeQuestion = (questionId: string) => {
+    updateDraft((current) => ({
+      ...current,
+      questions: current.questions.filter((question) => question.clientId !== questionId),
+    }));
   };
 
   const handleQuestionDragStart = (
@@ -291,13 +238,11 @@ export function AdminPage() {
     }
 
     moveQuestion(questionId, targetIndex);
-    setDraggedQuestionId(null);
-    setDragTargetIndex(null);
+    resetQuestionDrag();
   };
 
   const handleQuestionDragEnd = () => {
-    setDraggedQuestionId(null);
-    setDragTargetIndex(null);
+    resetQuestionDrag();
   };
 
   const handleSave = async () => {
@@ -449,292 +394,34 @@ export function AdminPage() {
         <section className="admin-main">
           {draft ? (
             <>
-              <div className="admin-panel">
-                <div className="admin-panel-header">
-                  <div>
-                    <span className="eyebrow">{isCreating ? "Creating" : "Editing"}</span>
-                    <h2>{isCreating ? "New posting" : (selectedJob?.title ?? "Posting")}</h2>
-                  </div>
-                  <button
-                    className="primary-button"
-                    disabled={isSaving}
-                    onClick={() => void handleSave()}
-                    type="button"
-                  >
-                    {isSaving ? "Saving..." : isCreating ? "Create posting" : "Save posting"}
-                  </button>
-                </div>
+              <JobEditorPanel
+                draft={draft}
+                draftSlug={draftSlug}
+                headingTitle={isCreating ? "New posting" : (selectedJob?.title ?? "Posting")}
+                isCreating={isCreating}
+                isSaving={isSaving}
+                draggedQuestionId={draggedQuestionId}
+                dragTargetIndex={dragTargetIndex}
+                onSave={() => {
+                  void handleSave();
+                }}
+                onDraftChange={replaceDraft}
+                onDraftSlugChange={setDraftSlug}
+                onQuestionChange={handleQuestionChange}
+                onAddQuestion={handleAddQuestion}
+                onInsertQuestion={insertQuestionAt}
+                onRemoveQuestion={removeQuestion}
+                onQuestionDragStart={handleQuestionDragStart}
+                onQuestionDragOver={handleQuestionDragOver}
+                onQuestionDrop={handleQuestionDrop}
+                onQuestionDragEnd={handleQuestionDragEnd}
+              />
 
-                <div className="admin-form-grid">
-                  <LabeledField
-                    label="Team"
-                    value={draft.team}
-                    onChange={(value) => setDraft({ ...draft, team: value })}
-                  />
-                  <LabeledField
-                    label="Title"
-                    value={draft.title}
-                    onChange={(value) => setDraft({ ...draft, title: value })}
-                  />
-                  <LabeledField
-                    label="Slug"
-                    value={draftSlug}
-                    onChange={setDraftSlug}
-                    disabled={!isCreating}
-                  />
-                  <LabeledField
-                    label="Sort order"
-                    value={String(draft.sortOrder)}
-                    onChange={(value) =>
-                      setDraft({ ...draft, sortOrder: Number.parseInt(value || "0", 10) || 0 })
-                    }
-                  />
-                  <LabeledField
-                    label="Card description"
-                    value={draft.cardDescription}
-                    onChange={(value) => setDraft({ ...draft, cardDescription: value })}
-                    textarea
-                  />
-                  <LabeledField
-                    label="Intro eyebrow"
-                    value={draft.introEyebrow}
-                    onChange={(value) => setDraft({ ...draft, introEyebrow: value })}
-                  />
-                  <LabeledField
-                    label="Intro title"
-                    value={draft.introTitle}
-                    onChange={(value) => setDraft({ ...draft, introTitle: value })}
-                    textarea
-                  />
-                  <LabeledField
-                    label="Intro description"
-                    value={draft.introDescription}
-                    onChange={(value) => setDraft({ ...draft, introDescription: value })}
-                    textarea
-                  />
-                </div>
-
-                <label className="admin-checkbox">
-                  <input
-                    checked={draft.isActive}
-                    onChange={(event) => setDraft({ ...draft, isActive: event.target.checked })}
-                    type="checkbox"
-                  />
-                  <span>Posting is active</span>
-                </label>
-
-                <div className="admin-questions">
-                  <div className="admin-questions-header">
-                    <span className="eyebrow">Questions</span>
-                    <button
-                      className="ghost-button"
-                      onClick={() =>
-                        setDraft({
-                          ...draft,
-                          questions: [...draft.questions, createDraftQuestion()],
-                        })
-                      }
-                      type="button"
-                    >
-                      Add question
-                    </button>
-                  </div>
-                  <div className="admin-question-list">
-                    {draft.questions.map((question, index) => (
-                      <Fragment key={question.clientId}>
-                        <div
-                          className={`admin-question-slot ${
-                            index === 0 ? "is-edge" : ""
-                          } ${
-                            draggedQuestionId ? "is-dragging" : ""
-                          } ${
-                            dragTargetIndex === index ? "is-active" : ""
-                          }`}
-                          onDragOver={(event) => handleQuestionDragOver(event, index)}
-                          onDrop={(event) => handleQuestionDrop(event, index)}
-                        >
-                          <span>Drop question here</span>
-                          {index > 0 ? (
-                            <button
-                              className="admin-insert-question"
-                              onClick={() => insertQuestionAt(index)}
-                              type="button"
-                            >
-                              +
-                            </button>
-                          ) : null}
-                        </div>
-                        <div
-                          className={`admin-question-card ${
-                            draggedQuestionId === question.clientId ? "is-dragging" : ""
-                          }`}
-                        >
-                          <div className="admin-question-header">
-                            <div className="admin-question-heading">
-                              <strong>Question {index + 1}</strong>
-                              <span>
-                                {stripRichText(question.prompt) || question.id || "Drag to reorder"}
-                              </span>
-                            </div>
-                            <button
-                              aria-label={`Drag to reorder question ${index + 1}`}
-                              className="admin-drag-handle"
-                              draggable
-                              onDragEnd={handleQuestionDragEnd}
-                              onDragStart={(event) =>
-                                handleQuestionDragStart(event, question.clientId)
-                              }
-                              type="button"
-                            >
-                              <span aria-hidden="true">::</span>
-                            </button>
-                          </div>
-                          <div className="admin-form-grid compact">
-                            <LabeledField
-                              label="ID"
-                              value={question.id}
-                              onChange={(value) =>
-                                handleQuestionChange(question.clientId, "id", value)
-                              }
-                            />
-                            <LabeledField
-                              label="Question"
-                              value={question.prompt}
-                              onChange={(value) =>
-                                handleQuestionChange(question.clientId, "prompt", value)
-                              }
-                              textarea
-                            />
-                            <LabeledField
-                              label="Description"
-                              value={question.helper}
-                              onChange={(value) =>
-                                handleQuestionChange(question.clientId, "helper", value)
-                              }
-                              textarea
-                            />
-                            <LabeledField
-                              label="Placeholder"
-                              value={question.placeholder}
-                              onChange={(value) =>
-                                handleQuestionChange(question.clientId, "placeholder", value)
-                              }
-                              textarea
-                            />
-                            <label className="admin-field">
-                              <span>Type</span>
-                              <select
-                                className="admin-input"
-                                onChange={(event) =>
-                                  handleQuestionChange(
-                                    question.clientId,
-                                    "type",
-                                    event.target.value,
-                                  )
-                                }
-                                value={question.type}
-                              >
-                                <option value="text">Text</option>
-                                <option value="textarea">Textarea</option>
-                                <option value="url">URL</option>
-                                <option value="currency">Currency</option>
-                              </select>
-                            </label>
-                          </div>
-                          <div className="admin-question-actions">
-                            <label className="admin-checkbox">
-                              <input
-                                checked={question.required}
-                                onChange={(event) =>
-                                  handleQuestionChange(
-                                    question.clientId,
-                                    "required",
-                                    event.target.checked,
-                                  )
-                                }
-                                type="checkbox"
-                              />
-                              <span>Required</span>
-                            </label>
-                            <button
-                              className="ghost-button danger"
-                              onClick={() =>
-                                setDraft({
-                                  ...draft,
-                                  questions: draft.questions.filter(
-                                    (draftQuestion) =>
-                                      draftQuestion.clientId !== question.clientId,
-                                  ),
-                                })
-                              }
-                              type="button"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      </Fragment>
-                    ))}
-                    <div
-                      aria-hidden="true"
-                      className={`admin-question-slot is-edge ${
-                        draggedQuestionId ? "is-dragging" : ""
-                      } ${
-                        dragTargetIndex === draft.questions.length ? "is-active" : ""
-                      }`}
-                      onDragOver={(event) =>
-                        handleQuestionDragOver(event, draft.questions.length)
-                      }
-                      onDrop={(event) =>
-                        handleQuestionDrop(event, draft.questions.length)
-                      }
-                    >
-                      <span>Drop question here</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-panel">
-                <div className="admin-panel-header">
-                  <div>
-                    <span className="eyebrow">Submissions</span>
-                    <h2>{filteredSubmissions.length} responses</h2>
-                  </div>
-                  <button
-                    className="ghost-button"
-                    disabled={!canDownloadCsv}
-                    onClick={handleDownloadCsv}
-                    type="button"
-                  >
-                    Download CSV
-                  </button>
-                </div>
-                <div className="admin-submission-list">
-                  {filteredSubmissions.map((submission) => (
-                    <article className="admin-submission-card" key={submission.id}>
-                      <div className="admin-submission-meta">
-                        <strong>{submission.jobTitle}</strong>
-                        <span>{new Date(submission.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="admin-answer-list">
-                        {Object.entries(submission.answers).map(([key, value]) => (
-                          <div className="admin-answer-row" key={key}>
-                            <span>{key}</span>
-                            <p>{value || "No answer"}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </article>
-                  ))}
-                  {filteredSubmissions.length === 0 ? (
-                    <div className="empty-state">
-                      <h3>No submissions yet.</h3>
-                      <p>New responses for this role will show up here.</p>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
+              <SubmissionsPanel
+                submissions={filteredSubmissions}
+                canDownloadCsv={canDownloadCsv}
+                onDownloadCsv={handleDownloadCsv}
+              />
             </>
           ) : null}
           {error ? <p className="submission-error">{error}</p> : null}
@@ -749,40 +436,4 @@ function escapeCsvValue(value: string) {
   const escaped = normalized.replace(/"/g, "\"\"");
 
   return `"${escaped}"`;
-}
-
-function LabeledField({
-  label,
-  value,
-  onChange,
-  textarea = false,
-  disabled = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  textarea?: boolean;
-  disabled?: boolean;
-}) {
-  return (
-    <label className="admin-field">
-      <span>{label}</span>
-      {textarea ? (
-        <textarea
-          className="admin-input admin-textarea"
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          rows={4}
-          value={value}
-        />
-      ) : (
-        <input
-          className="admin-input"
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          value={value}
-        />
-      )}
-    </label>
-  );
 }
