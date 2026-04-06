@@ -276,7 +276,7 @@ export function JobApplicationPage() {
             src="/thanks.png"
           />
           <h1>Thanks.</h1>
-          <p>If the fit is real, we will get back to you quickly!</p>
+          <p>If the fit is real, we will get back to you!</p>
           <a
             className="primary-button primary-button-accent"
             href="https://ente.com/"
