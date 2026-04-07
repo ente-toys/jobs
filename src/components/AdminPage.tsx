@@ -31,6 +31,7 @@ export function AdminPage() {
   const [draftSlug, setDraftSlug] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
   const [draggedQuestionId, setDraggedQuestionId] = useState<string | null>(null);
   const [dragTargetIndex, setDragTargetIndex] = useState<number | null>(null);
 
@@ -57,8 +58,6 @@ export function AdminPage() {
 
     return data.submissions.filter((submission) => submission.jobSlug === selectedJobSlug);
   }, [data, selectedJobSlug]);
-
-  const canDownloadCsv = filteredSubmissions.length > 0;
 
   const replaceDraft = (nextDraft: AdminDraft) => {
     setDraft(nextDraft);
@@ -90,6 +89,7 @@ export function AdminPage() {
       setDraft(currentJob ? hydrateDraft(currentJob) : null);
       setDraftSlug(currentJob?.slug ?? "");
       setIsCreating(false);
+      setIsSubmissionsOpen(false);
       resetQuestionDrag();
       setViewState("ready");
     } catch (loadError) {
@@ -117,6 +117,7 @@ export function AdminPage() {
     setDraft(hydrateDraft(job));
     setDraftSlug(job.slug);
     setIsCreating(false);
+    setIsSubmissionsOpen(false);
     setError(null);
     resetQuestionDrag();
   };
@@ -127,6 +128,7 @@ export function AdminPage() {
     setDraft(freshDraft);
     setDraftSlug("");
     setIsCreating(true);
+    setIsSubmissionsOpen(false);
     setError(null);
     resetQuestionDrag();
   };
@@ -280,17 +282,19 @@ export function AdminPage() {
     }
   };
 
-  const handleDownloadCsv = () => {
-    if (filteredSubmissions.length === 0) {
+  const handleDownloadCsv = (scope: "selected" | "all") => {
+    const exportSubmissions = scope === "all" ? data?.submissions ?? [] : filteredSubmissions;
+
+    if (exportSubmissions.length === 0) {
       return;
     }
 
     const answerKeys = Array.from(
-      new Set(filteredSubmissions.flatMap((submission) => Object.keys(submission.answers))),
+      new Set(exportSubmissions.flatMap((submission) => Object.keys(submission.answers))),
     ).sort((left, right) => left.localeCompare(right));
 
     const headers = ["submission_id", "job_slug", "job_title", "submitted_at", ...answerKeys];
-    const rows = filteredSubmissions.map((submission) => [
+    const rows = exportSubmissions.map((submission) => [
       submission.id,
       submission.jobSlug,
       submission.jobTitle,
@@ -305,7 +309,7 @@ export function AdminPage() {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");
-    const fileSuffix = selectedJobSlug ?? "all";
+    const fileSuffix = scope === "all" ? "all" : selectedJobSlug ?? "all";
 
     anchor.href = url;
     anchor.download = `ente-job-responses-${fileSuffix}.csv`;
@@ -400,11 +404,14 @@ export function AdminPage() {
                 headingTitle={isCreating ? "New posting" : (selectedJob?.title ?? "Posting")}
                 isCreating={isCreating}
                 isSaving={isSaving}
+                canViewSubmissions={Boolean(selectedJob)}
+                submissionCount={selectedJob ? filteredSubmissions.length : 0}
                 draggedQuestionId={draggedQuestionId}
                 dragTargetIndex={dragTargetIndex}
                 onSave={() => {
                   void handleSave();
                 }}
+                onViewSubmissions={() => setIsSubmissionsOpen(true)}
                 onDraftChange={replaceDraft}
                 onDraftSlugChange={setDraftSlug}
                 onQuestionChange={handleQuestionChange}
@@ -416,10 +423,12 @@ export function AdminPage() {
                 onQuestionDrop={handleQuestionDrop}
                 onQuestionDragEnd={handleQuestionDragEnd}
               />
-
               <SubmissionsPanel
-                submissions={filteredSubmissions}
-                canDownloadCsv={canDownloadCsv}
+                isOpen={isSubmissionsOpen}
+                jobs={data.jobs}
+                selectedJob={selectedJob}
+                submissions={data.submissions}
+                onClose={() => setIsSubmissionsOpen(false)}
                 onDownloadCsv={handleDownloadCsv}
               />
             </>

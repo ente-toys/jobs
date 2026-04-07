@@ -11,9 +11,12 @@ interface JobEditorPanelProps {
   headingTitle: string;
   isCreating: boolean;
   isSaving: boolean;
+  canViewSubmissions: boolean;
+  submissionCount: number;
   draggedQuestionId: string | null;
   dragTargetIndex: number | null;
   onSave: () => void;
+  onViewSubmissions: () => void;
   onDraftChange: (draft: AdminDraft) => void;
   onDraftSlugChange: (slug: string) => void;
   onQuestionChange: (
@@ -36,9 +39,12 @@ export function JobEditorPanel({
   headingTitle,
   isCreating,
   isSaving,
+  canViewSubmissions,
+  submissionCount,
   draggedQuestionId,
   dragTargetIndex,
   onSave,
+  onViewSubmissions,
   onDraftChange,
   onDraftSlugChange,
   onQuestionChange,
@@ -57,14 +63,21 @@ export function JobEditorPanel({
           <span className="eyebrow">{isCreating ? "Creating" : "Editing"}</span>
           <h2>{headingTitle}</h2>
         </div>
-        <button
-          className="primary-button"
-          disabled={isSaving}
-          onClick={onSave}
-          type="button"
-        >
-          {isSaving ? "Saving..." : isCreating ? "Create posting" : "Save posting"}
-        </button>
+        <div className="admin-panel-header-actions">
+          {canViewSubmissions ? (
+            <button className="ghost-button" onClick={onViewSubmissions} type="button">
+              View submissions ({submissionCount})
+            </button>
+          ) : null}
+          <button
+            className="primary-button"
+            disabled={isSaving}
+            onClick={onSave}
+            type="button"
+          >
+            {isSaving ? "Saving..." : isCreating ? "Create posting" : "Save posting"}
+          </button>
+        </div>
       </div>
 
       <div className="admin-form-grid">
