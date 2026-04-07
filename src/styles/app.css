@@ -1310,22 +1310,25 @@ button {
 .admin-table-scroll {
   height: 100%;
   max-height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .admin-submissions-table {
   width: 100%;
-  min-width: max-content;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
 }
 
 .admin-submissions-table th,
 .admin-submissions-table td {
-  padding: 16px 18px;
+  padding: 12px 14px;
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid rgba(21, 21, 21, 0.08);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .admin-submissions-table thead th {
@@ -1339,27 +1342,35 @@ button {
 
 .admin-submissions-table th.is-meta,
 .admin-submissions-table td.is-meta {
-  min-width: 180px;
+  width: clamp(110px, 10vw, 140px);
 }
 
 .admin-submissions-table th.is-answer,
 .admin-submissions-table td.is-answer {
-  min-width: 240px;
+  width: auto;
 }
 
 .admin-table-sort {
   width: 100%;
-  min-height: 64px;
-  padding: 16px 18px;
+  min-height: 56px;
+  padding: 12px 14px;
   border: 0;
   background: transparent;
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  align-items: center;
+  gap: 10px;
+  align-items: flex-start;
   font-weight: 800;
+  font-size: 0.92rem;
   letter-spacing: -0.01em;
   color: var(--ink);
+  text-align: left;
+}
+
+.admin-table-sort > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.35;
 }
 
 .admin-table-sort:hover {
@@ -1438,26 +1449,31 @@ button {
   display: inline-flex;
   color: rgba(21, 21, 21, 0.78);
   font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .admin-table-posting {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .admin-table-posting strong {
-  font-size: 0.98rem;
+  font-size: 0.92rem;
+  line-height: 1.3;
 }
 
 .admin-table-posting span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.8rem;
+  line-height: 1.3;
 }
 
 .admin-answer-cell {
   margin: 0;
   white-space: pre-wrap;
-  line-height: 1.6;
+  line-height: 1.45;
+  font-size: 0.9rem;
   color: rgba(21, 21, 21, 0.82);
 }
 
@@ -1465,6 +1481,7 @@ button {
   display: inline-flex;
   color: rgba(21, 21, 21, 0.42);
   font-style: italic;
+  font-size: 0.88rem;
 }
 
 .admin-modal-empty-state {
