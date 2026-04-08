@@ -66,7 +66,7 @@ export function JobEditorPanel({
         <div className="admin-panel-header-actions">
           {canViewSubmissions ? (
             <button className="ghost-button" onClick={onViewSubmissions} type="button">
-              View submissions ({submissionCount})
+              {submissionCount} {submissionCount === 1 ? "submission" : "submissions"} &rsaquo;
             </button>
           ) : null}
           <button
