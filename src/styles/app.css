@@ -336,6 +336,42 @@ button {
   margin: 0 0 1em;
 }
 
+.rich-copy h1,
+.rich-copy h2,
+.rich-copy h3,
+.rich-copy h4,
+.rich-copy h5,
+.rich-copy h6 {
+  margin: 0 0 0.6em;
+  line-height: 1.24;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.rich-copy h1 {
+  font-size: 1.7em;
+}
+
+.rich-copy h2 {
+  font-size: 1.48em;
+}
+
+.rich-copy h3 {
+  font-size: 1.3em;
+}
+
+.rich-copy h4 {
+  font-size: 1.14em;
+}
+
+.rich-copy h5 {
+  font-size: 1em;
+}
+
+.rich-copy h6 {
+  font-size: 0.92em;
+}
+
 .rich-copy ul,
 .rich-copy ol {
   padding-left: 1.2em;

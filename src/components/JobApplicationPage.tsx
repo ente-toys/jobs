@@ -401,6 +401,7 @@ function StepIntro({
       />
       <RichText
         className="intro-copy rich-copy"
+        format="markdown"
         html={job.introDescription}
         mode="block"
       />

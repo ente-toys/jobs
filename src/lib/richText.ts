@@ -1,27 +1,54 @@
+import { marked } from "marked";
+
 export type RichTextMode = "inline" | "block";
+export type RichTextFormat = "html" | "markdown";
 
 const inlineTags = new Set(["A", "B", "BR", "CODE", "EM", "I", "STRONG"]);
-const blockTags = new Set([...inlineTags, "LI", "OL", "P", "UL"]);
+const blockTags = new Set([
+  ...inlineTags,
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "LI",
+  "OL",
+  "P",
+  "UL",
+]);
 const blockedTags = new Set(["EMBED", "IFRAME", "NOSCRIPT", "OBJECT", "SCRIPT", "STYLE", "TEMPLATE"]);
 const safeHrefPattern = /^(https?:|mailto:|tel:|\/|#)/i;
 const bareDomainPattern = /^(?:www\.)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[/:?#]|$)/i;
 
-export function sanitizeRichTextHtml(input: string, mode: RichTextMode): string {
+export function sanitizeRichTextHtml(
+  input: string,
+  mode: RichTextMode,
+  format: RichTextFormat = "html",
+): string {
   if (!input) {
     return "";
   }
 
+  const html = format === "markdown"
+    ? marked.parse(input, {
+        async: false,
+        breaks: true,
+        gfm: true,
+      })
+    : input;
+
   if (typeof DOMParser === "undefined") {
-    return escapeHtml(input);
+    return escapeHtml(html);
   }
 
   const allowedTags = mode === "inline" ? inlineTags : blockTags;
   const parser = new DOMParser();
-  const document = parser.parseFromString(`<div>${input}</div>`, "text/html");
+  const document = parser.parseFromString(`<div>${html}</div>`, "text/html");
   const root = document.body.firstElementChild as HTMLElement | null;
 
   if (!root) {
-    return escapeHtml(input);
+    return escapeHtml(html);
   }
 
   sanitizeChildren(root, allowedTags);
