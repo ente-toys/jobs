@@ -642,6 +642,16 @@ button {
   font-size: 1rem;
 }
 
+.intro-copy {
+  margin-top: 0.75rem;
+}
+
+.intro-copy p,
+.intro-copy ul,
+.intro-copy ol {
+  margin-bottom: 0.5em;
+}
+
 .intro-summary {
   display: flex;
   flex-wrap: wrap;
