@@ -98,16 +98,6 @@ export function JobEditorPanel({
           disabled={!isCreating}
         />
         <LabeledField
-          label="Sort order"
-          value={String(draft.sortOrder)}
-          onChange={(value) =>
-            onDraftChange({
-              ...draft,
-              sortOrder: Number.parseInt(value || "0", 10) || 0,
-            })
-          }
-        />
-        <LabeledField
           label="Card description"
           value={draft.cardDescription}
           onChange={(value) => onDraftChange({ ...draft, cardDescription: value })}
@@ -129,6 +119,9 @@ export function JobEditorPanel({
           value={draft.introDescription}
           onChange={(value) => onDraftChange({ ...draft, introDescription: value })}
           textarea
+          fullWidth
+          rows={10}
+          tallTextarea
         />
       </div>
 

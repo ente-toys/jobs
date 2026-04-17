@@ -4,6 +4,9 @@ interface LabeledFieldProps {
   onChange: (value: string) => void;
   textarea?: boolean;
   disabled?: boolean;
+  fullWidth?: boolean;
+  rows?: number;
+  tallTextarea?: boolean;
 }
 
 export function LabeledField({
@@ -12,16 +15,19 @@ export function LabeledField({
   onChange,
   textarea = false,
   disabled = false,
+  fullWidth = false,
+  rows = 4,
+  tallTextarea = false,
 }: LabeledFieldProps) {
   return (
-    <label className="admin-field">
+    <label className={`admin-field ${fullWidth ? "is-full-width" : ""}`}>
       <span>{label}</span>
       {textarea ? (
         <textarea
-          className="admin-input admin-textarea"
+          className={`admin-input admin-textarea ${tallTextarea ? "is-tall" : ""}`}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          rows={4}
+          rows={rows}
           value={value}
         />
       ) : (

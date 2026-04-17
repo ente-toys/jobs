@@ -939,6 +939,19 @@ button {
   border-radius: 22px;
   padding: 16px;
   text-align: left;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.admin-job-select {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
 
 .admin-job-item strong,
@@ -959,6 +972,41 @@ button {
 .admin-job-item.is-selected {
   border-color: rgba(var(--accent-rgb), 0.28);
   background: rgba(255, 250, 243, 0.88);
+}
+
+.admin-job-order-actions {
+  display: inline-flex;
+  gap: 8px;
+  align-self: start;
+}
+
+.admin-order-button {
+  width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(21, 21, 21, 0.74);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease,
+    opacity 220ms ease;
+}
+
+.admin-order-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb), 0.28);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.admin-order-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
 }
 
 .admin-panel {
@@ -1112,6 +1160,10 @@ button {
   gap: 8px;
 }
 
+.admin-field.is-full-width {
+  grid-column: 1 / -1;
+}
+
 .admin-field span {
   font-size: 0.78rem;
   font-weight: 700;
@@ -1136,6 +1188,10 @@ button {
 .admin-textarea {
   min-height: 112px;
   resize: vertical;
+}
+
+.admin-textarea.is-tall {
+  min-height: 240px;
 }
 
 .admin-checkbox {

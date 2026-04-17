@@ -34,6 +34,7 @@ export function AdminPage() {
   const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
   const [draggedQuestionId, setDraggedQuestionId] = useState<string | null>(null);
   const [dragTargetIndex, setDragTargetIndex] = useState<number | null>(null);
+  const [isReorderingJobs, setIsReorderingJobs] = useState(false);
 
   useEffect(() => {
     const existing = window.localStorage.getItem("ente-jobs-admin-key");
@@ -282,6 +283,76 @@ export function AdminPage() {
     }
   };
 
+  const persistJobOrder = async (jobSlug: string, direction: -1 | 1) => {
+    if (!data || isReorderingJobs) {
+      return;
+    }
+
+    const currentIndex = data.jobs.findIndex((job) => job.slug === jobSlug);
+    const targetIndex = currentIndex + direction;
+
+    if (currentIndex === -1 || targetIndex < 0 || targetIndex >= data.jobs.length) {
+      return;
+    }
+
+    const reorderedJobs = [...data.jobs];
+    const [movedJob] = reorderedJobs.splice(currentIndex, 1);
+    reorderedJobs.splice(targetIndex, 0, movedJob);
+
+    const nextJobs = reorderedJobs.map((job, index) => ({
+      ...job,
+      sortOrder: index,
+    }));
+    const changedJobs = nextJobs.filter((job, index) => job.sortOrder !== data.jobs[index]?.sortOrder
+      || job.slug !== data.jobs[index]?.slug);
+
+    if (changedJobs.length === 0) {
+      return;
+    }
+
+    setIsReorderingJobs(true);
+    setError(null);
+
+    try {
+      await Promise.all(
+        changedJobs.map((job) =>
+          updateAdminJob(job.slug, {
+            team: job.team,
+            title: job.title,
+            cardDescription: job.cardDescription,
+            introEyebrow: job.introEyebrow,
+            introTitle: job.introTitle,
+            introDescription: job.introDescription,
+            questions: job.questions,
+            isActive: job.isActive,
+            sortOrder: job.sortOrder,
+          }),
+        ),
+      );
+
+      setData((current) => (current ? { ...current, jobs: nextJobs } : current));
+      setDraft((current) => {
+        if (!current || isCreating || !selectedJobSlug) {
+          return current;
+        }
+
+        const updatedSelectedJob = nextJobs.find((job) => job.slug === selectedJobSlug);
+        if (!updatedSelectedJob) {
+          return current;
+        }
+
+        return {
+          ...current,
+          sortOrder: updatedSelectedJob.sortOrder,
+        };
+      });
+    } catch (reorderError) {
+      setError(reorderError instanceof Error ? reorderError.message : "Could not reorder roles.");
+    } finally {
+      setIsReorderingJobs(false);
+    }
+  };
+
   const handleDownloadCsv = (scope: "selected" | "all") => {
     const exportSubmissions = scope === "all" ? data?.submissions ?? [] : filteredSubmissions;
 
@@ -381,16 +452,44 @@ export function AdminPage() {
             </button>
           </div>
           <div className="admin-job-list">
-            {data.jobs.map((job) => (
-              <button
+            {data.jobs.map((job, index) => (
+              <div
                 key={job.slug}
                 className={`admin-job-item ${selectedJobSlug === job.slug ? "is-selected" : ""}`}
-                onClick={() => handleSelectJob(job)}
-                type="button"
               >
-                <strong>{job.title}</strong>
-                <span>{job.team}</span>
-              </button>
+                <button
+                  className="admin-job-select"
+                  onClick={() => handleSelectJob(job)}
+                  type="button"
+                >
+                  <strong>{job.title}</strong>
+                  <span>{job.team}</span>
+                </button>
+                <div className="admin-job-order-actions">
+                  <button
+                    aria-label={`Move ${job.title} up`}
+                    className="admin-order-button"
+                    disabled={isReorderingJobs || index === 0}
+                    onClick={() => {
+                      void persistJobOrder(job.slug, -1);
+                    }}
+                    type="button"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    aria-label={`Move ${job.title} down`}
+                    className="admin-order-button"
+                    disabled={isReorderingJobs || index === data.jobs.length - 1}
+                    onClick={() => {
+                      void persistJobOrder(job.slug, 1);
+                    }}
+                    type="button"
+                  >
+                    ↓
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </aside>
