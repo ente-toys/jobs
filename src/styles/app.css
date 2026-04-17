@@ -634,6 +634,10 @@ button {
   line-height: 0.98;
 }
 
+.step-frame-intro > h1.rich-copy {
+  margin-bottom: 0.45rem;
+}
+
 .intro-copy,
 .question-helper {
   max-width: 42rem;
@@ -645,12 +649,15 @@ button {
 
 .intro-copy {
   margin-top: 0.25rem;
+  white-space: normal;
 }
 
-.intro-copy p,
-.intro-copy ul,
-.intro-copy ol {
-  margin-bottom: 0.25em;
+.intro-copy > * {
+  margin-bottom: 0;
+}
+
+.intro-copy > * + * {
+  margin-top: 0.125em;
 }
 
 .intro-summary {
