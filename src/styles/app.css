@@ -648,7 +648,7 @@ button {
 }
 
 .intro-copy {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   white-space: normal;
 }
 
@@ -665,6 +665,7 @@ button {
   flex-wrap: wrap;
   gap: 14px;
   margin-top: auto;
+  padding-top: 0.75rem;
   align-items: end;
 }
 
