@@ -132,7 +132,7 @@ async function handleGetJob(env: Env, slug: string) {
     `SELECT slug, team, title, card_description, intro_eyebrow, intro_title,
             intro_description, questions_json, is_active, sort_order, created_at, updated_at
      FROM jobs
-     WHERE slug = ?1 AND is_active = 1
+     WHERE slug = ?1
      LIMIT 1`,
   )
     .bind(slug)
