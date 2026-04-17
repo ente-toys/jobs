@@ -410,10 +410,9 @@ function validateAdminJobInput(
     if (
       !question.id?.trim() ||
       !hasRichTextContent(question.prompt ?? "") ||
-      !hasRichTextContent(question.helper ?? "") ||
       !question.placeholder?.trim()
     ) {
-      throw new Error("Every question must include complete copy.");
+      throw new Error("Every question must include an ID, question, and placeholder.");
     }
   }
 

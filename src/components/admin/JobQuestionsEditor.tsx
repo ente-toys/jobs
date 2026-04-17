@@ -106,7 +106,7 @@ export function JobQuestionsEditor({
                   textarea
                 />
                 <LabeledField
-                  label="Description"
+                  label="Description (optional)"
                   value={question.helper}
                   onChange={(value) => onQuestionChange(question.clientId, "helper", value)}
                   textarea

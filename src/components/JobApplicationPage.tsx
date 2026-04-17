@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { getJob, submitApplication } from "../lib/api";
 import { thanksArtworkUrl } from "../lib/assets";
+import { hasRichTextContent } from "../lib/plainText";
 import { getRoleArtwork } from "../lib/roleArtwork";
 import type { JobDefinition, JobQuestion } from "../lib/types";
 import { QuestionField } from "./QuestionField";
@@ -549,11 +550,13 @@ function StepQuestion({
         html={question.prompt}
         mode="inline"
       />
-      <RichText
-        className="question-helper rich-copy"
-        html={question.helper}
-        mode="block"
-      />
+      {hasRichTextContent(question.helper) ? (
+        <RichText
+          className="question-helper rich-copy"
+          html={question.helper}
+          mode="block"
+        />
+      ) : null}
       <div className="flow-input-wrap" ref={fieldWrapRef}>
         <QuestionField
           setFieldRef={(node) => {
