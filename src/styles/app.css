@@ -626,6 +626,7 @@ button {
 .step-frame-intro {
   align-content: stretch;
   grid-template-rows: auto auto auto auto 1fr;
+  row-gap: 10px;
 }
 
 .flow-card h1 {
@@ -643,13 +644,13 @@ button {
 }
 
 .intro-copy {
-  margin-top: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 .intro-copy p,
 .intro-copy ul,
 .intro-copy ol {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.25em;
 }
 
 .intro-summary {
