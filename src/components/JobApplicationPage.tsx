@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { getJob, submitApplication } from "../lib/api";
+import { thanksArtworkUrl } from "../lib/assets";
 import { getRoleArtwork } from "../lib/roleArtwork";
 import type { JobDefinition, JobQuestion } from "../lib/types";
 import { QuestionField } from "./QuestionField";
@@ -273,7 +274,7 @@ export function JobApplicationPage() {
             alt=""
             aria-hidden="true"
             className="success-artwork"
-            src="/thanks.png"
+            src={thanksArtworkUrl}
           />
           <h1>Thanks.</h1>
           <p>If the fit is real, we will get back to you!</p>

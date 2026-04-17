@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { enteWordmarkUrl } from "../lib/assets";
+
 type SiteNavItem =
   | { href: string; label: string }
   | { label: string; to: string };
@@ -88,7 +90,7 @@ export function SiteNav() {
           onClick={closeNav}
           to="/"
         >
-          <img alt="Ente" src="/ente-wordmark.svg" />
+          <img alt="Ente" src={enteWordmarkUrl} />
         </Link>
         <button
           aria-controls="site-primary-nav"
