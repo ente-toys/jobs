@@ -2,19 +2,17 @@ import type {
   AdminBootstrapResponse,
   AdminCreateJobInput,
   AdminJobRecord,
-  AdminSubmissionRecord,
   AdminUpdateJobInput,
   ApplicationSubmissionInput,
   JobCard,
   JobDefinition,
   JobQuestion,
   SubmissionResponse,
-} from "../src/lib/types";
-import { hasRichTextContent, stripRichText } from "../src/lib/plainText";
+} from "../../src/lib/types";
+import { hasRichTextContent, stripRichText } from "../../src/lib/plainText";
 
 interface Env {
   DB: D1Database;
-  ASSETS: Fetcher;
   ADMIN_API_KEY?: string;
 }
 
@@ -45,65 +43,59 @@ const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
-export default {
-  async fetch(request, env): Promise<Response> {
-    const url = new URL(request.url);
+export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
+  const url = new URL(request.url);
 
-    try {
-      if (request.method === "GET" && url.pathname === "/api/jobs") {
-        return await handleGetJobs(env);
-      }
-
-      if (request.method === "GET" && url.pathname.startsWith("/api/jobs/")) {
-        const slug = decodeURIComponent(url.pathname.replace("/api/jobs/", ""));
-        return await handleGetJob(env, slug);
-      }
-
-      if (request.method === "POST" && url.pathname === "/api/applications") {
-        return await handleCreateApplication(request, env);
-      }
-
-      if (request.method === "GET" && url.pathname === "/api/admin/bootstrap") {
-        assertAdmin(request, env);
-        return await handleAdminBootstrap(env);
-      }
-
-      if (request.method === "POST" && url.pathname === "/api/admin/jobs") {
-        assertAdmin(request, env);
-        return await handleAdminCreateJob(request, env);
-      }
-
-      if (request.method === "PUT" && url.pathname.startsWith("/api/admin/jobs/")) {
-        assertAdmin(request, env);
-        const slug = decodeURIComponent(url.pathname.replace("/api/admin/jobs/", ""));
-        return await handleAdminUpdateJob(request, env, slug);
-      }
-
-      if (!url.pathname.startsWith("/api/")) {
-        return env.ASSETS.fetch(request);
-      }
-
-      return Response.json({ error: "Not found." }, { status: 404, headers: jsonHeaders });
-    } catch (error) {
-      if (error instanceof Response) {
-        return error;
-      }
-
-      const message = error instanceof Error ? error.message : "Unexpected server error.";
-      const friendlyMessage = message.includes("no such table")
-        ? "D1 is connected, but the schema is not initialized yet. Run the migrations first."
-        : message;
-
-      return Response.json(
-        { error: friendlyMessage },
-        {
-          status: 500,
-          headers: jsonHeaders,
-        },
-      );
+  try {
+    if (request.method === "GET" && url.pathname === "/api/jobs") {
+      return await handleGetJobs(env);
     }
-  },
-} satisfies ExportedHandler<Env>;
+
+    if (request.method === "GET" && url.pathname.startsWith("/api/jobs/")) {
+      const slug = decodeURIComponent(url.pathname.replace("/api/jobs/", ""));
+      return await handleGetJob(env, slug);
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/applications") {
+      return await handleCreateApplication(request, env);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/bootstrap") {
+      assertAdmin(request, env);
+      return await handleAdminBootstrap(env);
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/jobs") {
+      assertAdmin(request, env);
+      return await handleAdminCreateJob(request, env);
+    }
+
+    if (request.method === "PUT" && url.pathname.startsWith("/api/admin/jobs/")) {
+      assertAdmin(request, env);
+      const slug = decodeURIComponent(url.pathname.replace("/api/admin/jobs/", ""));
+      return await handleAdminUpdateJob(request, env, slug);
+    }
+
+    return Response.json({ error: "Not found." }, { status: 404, headers: jsonHeaders });
+  } catch (error) {
+    if (error instanceof Response) {
+      return error;
+    }
+
+    const message = error instanceof Error ? error.message : "Unexpected server error.";
+    const friendlyMessage = message.includes("no such table")
+      ? "D1 is connected, but the schema is not initialized yet. Run the migrations first."
+      : message;
+
+    return Response.json(
+      { error: friendlyMessage },
+      {
+        status: 500,
+        headers: jsonHeaders,
+      },
+    );
+  }
+};
 
 async function handleGetJobs(env: Env) {
   const { results } = await env.DB.prepare(
@@ -390,7 +382,11 @@ function validateAnswers(
 function validateAdminJobInput(
   payload: Partial<AdminUpdateJobInput>,
 ): asserts payload is AdminUpdateJobInput {
-  if (!payload.team?.trim() || !payload.title?.trim() || !hasRichTextContent(payload.cardDescription ?? "")) {
+  if (
+    !payload.team?.trim() ||
+    !payload.title?.trim() ||
+    !hasRichTextContent(payload.cardDescription ?? "")
+  ) {
     throw new Error("Team, title, and card description are required.");
   }
 
@@ -445,7 +441,7 @@ function assertAdmin(request: Request, env: Env) {
   const configuredKey = env.ADMIN_API_KEY;
 
   if (!configuredKey) {
-    throw new Error("ADMIN_API_KEY is not configured for this Worker.");
+    throw new Error("ADMIN_API_KEY is not configured for this Pages Function.");
   }
 
   const providedKey = request.headers.get("x-admin-key");

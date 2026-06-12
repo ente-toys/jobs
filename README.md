@@ -1,11 +1,11 @@
 # Ente Jobs
 
-Minimal React job board for `jobs.ente.com`, with Cloudflare Workers serving the app and D1 storing both job definitions and application submissions.
+Minimal React job board for `jobs.ente.com`, with Cloudflare Pages serving the app, Pages Functions serving the API, and D1 storing both job definitions and application submissions.
 
 ## Stack
 
 - React + Vite for the front-end
-- Cloudflare Worker API routes for jobs and applications
+- Cloudflare Pages Functions for jobs and applications API routes
 - Cloudflare D1 for job definitions and submissions
 - A schema-driven multi-step form so new roles can be added as data
 
@@ -37,34 +37,28 @@ Minimal React job board for `jobs.ente.com`, with Cloudflare Workers serving the
    yarn dev
    ```
 
-## Production deploys with GitHub Actions
+## Production deploys
 
-This repo includes [`.github/workflows/deploy.yml`](/Users/vishnu/work/jobs/.github/workflows/deploy.yml), which:
+Cloudflare Pages deploys from GitHub on pushes to `main`.
 
-- installs dependencies
-- builds the app
-- applies remote D1 migrations
-- deploys the Worker to Cloudflare on every push to `main`
+Project settings:
 
-One-time setup:
+- build command: `yarn build`
+- build output directory: `dist`
+- D1 binding: `DB`
+- environment variable: `ADMIN_API_KEY`
 
-1. Create the production D1 database:
+Apply migrations locally before testing:
 
-   ```bash
-   npx wrangler d1 create ente-jobs
-   ```
+```bash
+yarn db:local
+```
 
-2. Copy the returned `database_id` into [wrangler.jsonc](/Users/vishnu/work/jobs/wrangler.jsonc).
+Cloudflare Pages does not run D1 migrations during deploys. Apply production migrations manually with Wrangler:
 
-3. In GitHub repository settings, add these Actions secrets:
-
-   - `CLOUDFLARE_ACCOUNT_ID`
-   - `CLOUDFLARE_API_TOKEN`
-   - `ADMIN_API_KEY`
-
-4. Push to `main`, or run the workflow manually from the Actions tab.
-
-The Worker is configured to deploy on the custom domain `jobs.ente.com`.
+```bash
+yarn db:remote
+```
 
 ## Admin
 

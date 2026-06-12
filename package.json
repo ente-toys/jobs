@@ -7,9 +7,9 @@
     "dev": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite",
     "build": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler tsc --noEmit && XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite build",
     "preview": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite preview",
-    "deploy": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite build && XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler deploy",
+    "deploy": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler vite build && XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler pages deploy dist --project-name ente-jobs",
     "db:local": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler d1 migrations apply ente-jobs --local",
-    "db:remote": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler d1 migrations apply ente-jobs"
+    "db:remote": "XDG_CONFIG_HOME=.config WRANGLER_HOME=.wrangler wrangler d1 migrations apply ente-jobs --remote"
   },
   "dependencies": {
     "@fontsource/sora": "^5.2.6",
